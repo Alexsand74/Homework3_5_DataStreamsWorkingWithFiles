@@ -1,0 +1,76 @@
+# Выводим всех студентов из базы данных
+GET http://localhost:8080/student/byAll
+###
+# Выводим студента из базы данных по возрасту 15 лет
+GET http://localhost:8080/student/byAge?age=15
+###
+# Выводим студентов из базы данных по возрасту от мин и макс
+GET http://localhost:8080/student/byAgeBetween?min=15&max=19
+###
+# Вводим изменнения студента в базу данных
+PUT http://localhost:8080/student
+Content-Type: application/json
+
+{
+"id": 2,
+"name": "Рома",
+"age": 21
+}
+###
+# Вводим студента в базу данных
+POST http://localhost:8080/student
+Content-Type: application/json
+
+{
+
+  "name": "Гриша",
+  "age": 12
+ }
+###
+# Выводим студента из базы данных по ID
+GET http://localhost:8080/student/3
+###
+# Выводим все факультеты из базы данных
+GET http://localhost:8080/faculty/byAll
+###
+# Вводим изменнения факультета в базу данных
+PUT http://localhost:8080/faculty
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Философия",
+  "color": "Красный"
+}
+###
+# Вводим Факультет в базу данных
+POST http://localhost:8080/faculty
+Content-Type: application/json
+
+{
+  "name": "Информатика",
+  "color": "Красный"
+}
+###
+# Выводим факультет из базы данных по ID
+GET http://localhost:8080/faculty/4
+###
+# Выводим факультет из базы данных по названию или цвету
+GET http://localhost:8080/faculty/byNameOrColor?name=ФизМат&color=красный
+###
+# Выводим всех студентов придлежащих факультету из базы данных по ID - факультета
+GET http://localhost:8080/student/byFaculty/1
+###
+# Выводим всех студентов придлежащих факультету из базы данных по ID - факультета
+GET http://localhost:8080/faculty/3/students
+###
+# Выводим всех студентов придлежащих факультету из базы данных по названию факультета
+GET http://localhost:8080/faculty/химия/studentsOfFaculty
+###
+# Эти запросы с файлами делаются Postman или Swagger или в другом опроснике
+# Вводим файл (аватар) студента 1 - ID,  в базу данных
+POST http://localhost:8080/avatar/1
+###
+# Выводим файл (аватар) студента 1 - ID, из базы данных
+GET http://localhost:8080/avatar/1
+###
