@@ -15,7 +15,6 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/avatar")
 public class AvatarController {
-
     private final AvatarService service;
 
     public AvatarController(AvatarService service) {

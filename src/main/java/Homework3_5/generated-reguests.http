@@ -13,8 +13,13 @@ Content-Type: application/json
 
 {
 "id": 2,
-"name": "Рома",
-"age": 21
+"name": "Маша",
+"age": 20,
+ "faculty": {
+"id": 2,
+"color": "Зеленый",
+"name": "Химия"
+ }
 }
 ###
 # Вводим студента в базу данных
@@ -62,10 +67,10 @@ GET http://localhost:8080/faculty/byNameOrColor?name=ФизМат&color=крас
 GET http://localhost:8080/student/byFaculty/1
 ###
 # Выводим всех студентов придлежащих факультету из базы данных по ID - факультета
-GET http://localhost:8080/faculty/3/students
+GET http://localhost:8080/faculty/1/students
 ###
 # Выводим всех студентов придлежащих факультету из базы данных по названию факультета
-GET http://localhost:8080/faculty/химия/studentsOfFaculty
+GET http://localhost:8080/faculty/философия/studentsOfFaculty
 ###
 # Эти запросы с файлами делаются Postman или Swagger или в другом опроснике
 # Вводим файл (аватар) студента 1 - ID,  в базу данных

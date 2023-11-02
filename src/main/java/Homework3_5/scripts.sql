@@ -7,3 +7,4 @@ select * from student ORDER BY age;
 select * from faculty;
 update student set faculty_id = 1;
 select * from avatar;
+select * from student ORDER BY id;
