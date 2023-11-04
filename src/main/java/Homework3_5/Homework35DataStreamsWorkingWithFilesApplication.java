@@ -8,6 +8,7 @@ public class Homework35DataStreamsWorkingWithFilesApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Homework35DataStreamsWorkingWithFilesApplication.class, args);
+
 	}
 
 }

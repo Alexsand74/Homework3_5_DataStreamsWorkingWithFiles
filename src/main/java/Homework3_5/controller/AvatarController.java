@@ -1,4 +1,5 @@
 package Homework3_5.controller;
+import Homework3_5.model.Avatar;
 import jakarta.servlet.http.HttpServletResponse;
 import Homework3_5.service.AvatarService;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/avatar")
@@ -56,6 +58,11 @@ public class AvatarController {
              var in = new FileInputStream(avatar.getFilePath())) {
             in.transferTo(out);
         }
+    }
+    @GetMapping
+    public Collection<Avatar> findAvatars(@RequestParam int page,
+                                          @RequestParam int pageSize) {
+        return service.find(page - 1, pageSize);
     }
 }
 

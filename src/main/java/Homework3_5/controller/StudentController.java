@@ -3,6 +3,8 @@ import Homework3_5.model.Faculty;
 import Homework3_5.model.Student;
 import Homework3_5.service.FacultyService;
 import Homework3_5.service.StudentService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -11,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/student")
 public class StudentController {
-
     private final StudentService service;
     private final FacultyService facultyService;
 
@@ -61,6 +62,20 @@ public class StudentController {
     @GetMapping("/byFaculty/{id}")
     public Collection<Student> byFaculty (@PathVariable long id) {
         return service.returnByFaculty(id);
+    }
+
+    @GetMapping("/totalCount")
+    public int totalCountOfStudents() {
+        return service.totalCountOfStudents();
+    }
+
+    @GetMapping("/averageAge")
+    public double averageAgeOfStudents() {
+        return service.averageAgeOfStudents();
+    }
+    @GetMapping("/lastStudents/{count}")
+    public Collection<Student> lastStudents(@PathVariable int count) {
+        return service.lastStudents(count);
     }
 }
 

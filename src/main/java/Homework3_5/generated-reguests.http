@@ -27,8 +27,7 @@ POST http://localhost:8080/student
 Content-Type: application/json
 
 {
-
-  "name": "Гриша",
+  "name": "МаксимТестБазы",
   "age": 12
  }
 ###
@@ -78,4 +77,15 @@ POST http://localhost:8080/avatar/1
 ###
 # Выводим файл (аватар) студента 1 - ID, из базы данных
 GET http://localhost:8080/avatar/1
+###
+DELETE http://localhost:8080/student/449
+###
+# Возвращает количество строк в таблице студентов
+GET http://localhost:8080/student/totalCount
+###
+# Возвращает среднее значение лет в таблице студентов
+GET http://localhost:8080/student/averageAge
+###
+# Возвращает количество студентов начиная с последнего
+GET http://localhost:8080/student/lastStudents/8
 ###

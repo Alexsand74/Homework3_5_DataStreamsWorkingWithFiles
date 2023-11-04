@@ -2,7 +2,12 @@ package Homework3_5.controller;
 
 import Homework3_5.model.Faculty;
 import Homework3_5.repository.StudentRepository;
+import net.bytebuddy.asm.MemberSubstitution;
+import org.apache.naming.java.javaURLContextFactory;
 import org.assertj.core.api.Assertions;
+import org.h2.expression.Parameter;
+import org.hibernate.mapping.Array;
+import org.hibernate.mapping.Index;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +19,10 @@ import org.springframework.http.HttpMethod;
 import Homework3_5.model.Student;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -37,6 +45,7 @@ public class StudentControllerTest {
 //      проверяем созданы ли ниже описанные сущности
         Assertions.assertThat(studentController).isNotNull();
         Assertions.assertThat(studentRepository).isNotNull();
+        System.out.println(" -----------ЭТО ПОРТ------------>" + port);
     }
 
     //    @PostMapping
@@ -154,15 +163,13 @@ public class StudentControllerTest {
 //    public Collection<Student> byAge(@RequestParam int age)
     @Test
     void testFilterByAge() {
+        int variableAge = 68;
 //       создаем исходные данные, с чем будем работать и проверять
 //       регистрируем в базе данных новых студентов
-        var s1 = restTemplate.postForObject("/student", student("Test1", 66), Student.class);
-        var s2 = restTemplate.postForObject("/student", student("Test2", 67), Student.class);
-        var s3 = restTemplate.postForObject("/student", student("Test3", 68), Student.class);
-        var s4 = restTemplate.postForObject("/student", student("Test4", 69), Student.class);
-        var s5 = restTemplate.postForObject("/student", student("Test5", 68), Student.class);
-//      возвращаем параметрорезированную коллекцию ResponseEntity по студентам - ParameterizedTypeReference<Collection<Student>>
-        var result = restTemplate.exchange("/student/byAge?age=68",
+        creatingStudentDatabase();
+        var s1 = restTemplate.postForObject("/student", student("Test" + variableAge, variableAge ), Student.class);
+//      возвращаем параметрорезированную коллекцию ResponseEntity по студентам - ParameterizedTypeReference<Collection<Student>
+        var result = restTemplate.exchange("/student/byAge?age=" + variableAge,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
@@ -172,13 +179,11 @@ public class StudentControllerTest {
 //      проверяем полученную коллекцию, студентов, что не = null, имеет размер 2 и в неё входят студенты s3,s5
         Assertions.assertThat(students).isNotNull();
         Assertions.assertThat(students.size()).isEqualTo(2);
-        Assertions.assertThat(students).containsExactly(s3, s5);
+        Assertions.assertThat(students).contains(s1,listStudents.get(2));
 //      очищаем базу данных от вновь внесенных студентов
         restTemplate.delete("/student/" + s1.getId());
-        restTemplate.delete("/student/" + s2.getId());
-        restTemplate.delete("/student/" + s3.getId());
-        restTemplate.delete("/student/" + s4.getId());
-        restTemplate.delete("/student/" + s5.getId());
+        removeStudentsFromBase();
+
     }
 
     //    @GetMapping("/byAgeBetween")
@@ -217,12 +222,7 @@ public class StudentControllerTest {
     @Test
     void testByAll() {
 //       создаем исходные данные, с чем будем работать и проверять
-//       регистрируем в базе данных новых студентов
-        var s1 = restTemplate.postForObject("/student", student("Test1", 66), Student.class);
-        var s2 = restTemplate.postForObject("/student", student("Test2", 67), Student.class);
-        var s3 = restTemplate.postForObject("/student", student("Test3", 68), Student.class);
-        var s4 = restTemplate.postForObject("/student", student("Test4", 69), Student.class);
-        var s5 = restTemplate.postForObject("/student", student("Test5", 68), Student.class);
+        creatingStudentDatabase();
 //      возвращаем параметрорезированную коллекцию ResponseEntity по студентам - ParameterizedTypeReference<Collection<Student>>
         var result = restTemplate.exchange("/student/byAll",
                 HttpMethod.GET,
@@ -231,17 +231,22 @@ public class StudentControllerTest {
                 });
 //      преобразуем ResponseEntity коллекцию в коллекцию студентов
         var students = result.getBody();
-//      проверяем полученную коллекцию студентов, что не = null, имеет размер 4 и в неё входят студенты s1, s2, s3, s4, s5
+//      проверяем полученную коллекцию студентов, что не = null, имеет размер 10 и в неё входят студенты
         Assertions.assertThat(students).isNotNull();
-//        Assertions.assertThat(students.size()).isEqualTo(5);
-        Assertions.assertThat(students.size()).isNotNull();
-        Assertions.assertThat(students).contains(s1, s2, s3, s4, s5);
+          Assertions.assertThat(students.size()).isNotNull();
+         Assertions.assertThat(students.size()).isEqualTo(listStudents.size());
+        Assertions.assertThat(students).isEqualTo(listStudents);
+        Assertions.assertThat(students).contains( listStudents.get(1),
+                                                  listStudents.get(2),
+                                                  listStudents.get(3),
+                                                  listStudents.get(4),
+                                                  listStudents.get(5),
+                                                  listStudents.get(6),
+                                                  listStudents.get(7),
+                                                  listStudents.get(8),
+                                                  listStudents.get(9));
 //      очищаем базу данных от вновь внесенных студентов
-        restTemplate.delete("/student/" + s1.getId());
-        restTemplate.delete("/student/" + s2.getId());
-        restTemplate.delete("/student/" + s3.getId());
-        restTemplate.delete("/student/" + s4.getId());
-        restTemplate.delete("/student/" + s5.getId());
+        removeStudentsFromBase();
     }
 
     //    @GetMapping("/byFaculty/{id}")
@@ -249,29 +254,10 @@ public class StudentControllerTest {
     @Test
     void testByFacultyIdByStudents() {
 //       создаем исходные данные, с чем будем работать и проверять
-//       регистрируем в базе данных факультетов наш тестируемый в будущем факультет
-        var registeredFacultyInTheDatabase = restTemplate.postForObject("/faculty",
-                faculty("Test-Faculty", "Test-Color"), Faculty.class);
-//       создаем студентов, id у них ещё нет
-        var s1 = student("Test1", 66);
-        var s2 = student("Test2", 67);
-        var s3 = student("Test3", 68);
-        var s4 = student("Test4", 69);
-        var s5 = student("Test5", 68);
-//       добавляем всем студентам один и тот же факультет
-        s1.setFaculty(registeredFacultyInTheDatabase);
-        s2.setFaculty(registeredFacultyInTheDatabase);
-        s3.setFaculty(registeredFacultyInTheDatabase);
-        s4.setFaculty(registeredFacultyInTheDatabase);
-        s5.setFaculty(registeredFacultyInTheDatabase);
-//        добавляем студентов в базу данных и возвращаем их уже с id
-        var saveStudentDb1 = restTemplate.postForObject("/student", s1, Student.class);
-        var saveStudentDb2 = restTemplate.postForObject("/student", s2, Student.class);
-        var saveStudentDb3 = restTemplate.postForObject("/student", s3, Student.class);
-        var saveStudentDb4 = restTemplate.postForObject("/student", s4, Student.class);
-        var saveStudentDb5 = restTemplate.postForObject("/student", s5, Student.class);
+        creatingStudentDatabase();
+
 //      возвращаем параметрорезированную коллекцию ResponseEntity по студентам - ParameterizedTypeReference<Collection<Student>>
-        var result = restTemplate.exchange("/student/byFaculty/" + registeredFacultyInTheDatabase.getId(),
+        var result = restTemplate.exchange("/student/byFaculty/" + listStudents.get(0).getFaculty().getId(),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Collection<Student>>() {
@@ -282,21 +268,110 @@ public class StudentControllerTest {
         Assertions.assertThat(students).isNotNull();
 //        Assertions.assertThat(students.size()).isEqualTo(5);
         Assertions.assertThat(students.size()).isNotNull();
-        Assertions.assertThat(students).contains(saveStudentDb1,
-                saveStudentDb2,
-                saveStudentDb3,
-                saveStudentDb4,
-                saveStudentDb5);
+        Assertions.assertThat(students.size()).isEqualTo(listStudents.size());
+        Assertions.assertThat(students).isEqualTo(listStudents);
+        Assertions.assertThat(students).contains( listStudents.get(2),
+                                                  listStudents.get(5),
+                                                  listStudents.get(6),
+                                                  listStudents.get(8),
+                                                  listStudents.get(9));
+
 //      очищаем базу данных от вновь внесенных студентов
-        restTemplate.delete("/student/" + saveStudentDb1.getId());
-        restTemplate.delete("/student/" + saveStudentDb2.getId());
-        restTemplate.delete("/student/" + saveStudentDb3.getId());
-        restTemplate.delete("/student/" + saveStudentDb4.getId());
-        restTemplate.delete("/student/" + saveStudentDb5.getId());
-        restTemplate.delete("/faculty/" + registeredFacultyInTheDatabase.getId());
+        removeStudentsFromBase();
     }
 
-    // метод создания факультета из полей
+    @Test
+    void testTotalCountOfStudents () {
+
+        creatingStudentDatabase();
+
+       var result = restTemplate.getForEntity("/student/totalCount", Object.class);
+        var studentsCounter = result.getBody();
+
+        Assertions.assertThat(studentsCounter).isNotNull();
+        Assertions.assertThat(studentsCounter).isEqualTo(10);
+
+        removeStudentsFromBase ();
+    }
+
+
+
+    @Test
+    void testAverageAgeOfStudents () {
+        creatingStudentDatabase();
+
+        var result = restTemplate
+                .getForEntity("/student/averageAge", Object.class)
+                .getBody();
+
+        Assertions.assertThat(result).isNotNull();
+        Assertions.assertThat(result).isEqualTo(70.5);
+
+        removeStudentsFromBase ();
+    }
+
+    @Test
+    void testLastStudents () {
+        creatingStudentDatabase();
+
+        int count = 5;
+//      возвращаем параметрорезированную коллекцию ResponseEntity по студентам - ParameterizedTypeReference<Collection<Student>>
+                var result = restTemplate.exchange("/student/lastStudents/" + count,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Collection<Student>>() {
+                });
+//      преобразуем ResponseEntity коллекцию в коллекцию студентов
+        var students = result.getBody();
+//      проверяем полученную коллекцию студентов, что не = null, имеет размер 5 и в неё входят студенты s1 s2, s3, s4, s5
+        Assertions.assertThat(students).isNotNull();
+        Assertions.assertThat(students.size()).isEqualTo(count);
+
+//        Assertions.assertThat(students).contains((Student)tempListStudents.listIterator());
+        Assertions.assertThat(students).contains(listStudents.get(9),
+                                                 listStudents.get(8),
+                                                 listStudents.get(7),
+                                                 listStudents.get(6),
+                                                 listStudents.get(5));
+
+        removeStudentsFromBase ();
+    }
+
+//    СОЗДАЕМ И ЗАПОЛНЯЕМ БАЗУ ДАННЫХ СТУДЕНТАМИ
+List<Student> listStudents = new ArrayList<>();
+    private void creatingStudentDatabase () {
+//       создаем исходные данные, с чем будем работать и проверять
+//       регистрируем в базе данных факультетов наш тестируемый в будущем факультет
+        var registeredFacultyInTheDatabase = restTemplate.postForObject("/faculty",
+                faculty("Test-Faculty", "Test-Color"), Faculty.class);
+
+//       создаем студентов, id у них ещё нет и формируем лист из студентов
+        int v = 65;
+        String s = "s";
+        String test = "Test";
+           for (int i = 1; i < 11; i++){
+//               создаем временного студента
+               Student tempStudent = student(test + i, 65 + i);
+//                временному студенту присваиваем факультет
+               tempStudent.setFaculty(registeredFacultyInTheDatabase);
+//                добавляем временного студента в лист студентов
+               listStudents.add(tempStudent);
+        }
+//           загружаем лист студентов в базу сразу же достаем студента уже с его id что в базе и ложим в тот же лист
+           for (int i = 0; i < 10; i++){
+               listStudents.set( i, (restTemplate.postForObject("/student", listStudents.get(i), Student.class)));
+               System.out.println(listStudents.get(i));
+        }
+    }
+
+// УДАЛЕНИЕ ВСЕХ СТУДЕНТОВ ИЗ БАЗЫ ДАННЫХ
+    private void removeStudentsFromBase() {
+        for (int i = 0; i < 10; i++){
+            Student tempStudent = listStudents.get(i);
+            restTemplate.delete("/student/" + tempStudent.getId());
+        }
+    }
+    // МЕТОД СОЗДАНИЯ ФАКАУЛЬТЕТА ИЗ ПОЛЕЙ
     private static Faculty faculty(String name, String color) {
         var f = new Faculty();
         f.setName(name);
@@ -304,7 +379,7 @@ public class StudentControllerTest {
         return f;
     }
 
-    // метод создания студента из полей
+    // МЕТОД СОЗДАНИЯ СТУДЕНТА
     private static Student student(String name, int age) {
         var s = new Student();
         s.setName(name);

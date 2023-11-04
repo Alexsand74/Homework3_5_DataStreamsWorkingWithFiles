@@ -6,12 +6,14 @@ import Homework3_5.model.Student;
 import Homework3_5.repository.AvatarRepository;
 import Homework3_5.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 
 
 @Service
@@ -67,6 +69,9 @@ public class AvatarService {
         return avatarRepository.findByStudentId(studentId).orElse(null);
     }
 
+    public Collection<Avatar> find(int page, int pageSize) {
+        return avatarRepository.findAll(PageRequest.of(page, pageSize)).getContent();
+    }
     /*  FileOutputStream out = null;
         try {
             out = new FileOutputStream(path);
