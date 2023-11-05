@@ -13,6 +13,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Collection<Student> findAllByAgeBetween(int min, int max);
     Collection<Student> findStudentsByFaculty_Id (long ig);
 
+// Возвращает количество строк в таблице студентов
     @Query(value = "SELECT count(id) FROM student", nativeQuery = true)
     int totalCountOfStudents();
 
