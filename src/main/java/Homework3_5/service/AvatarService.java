@@ -5,6 +5,8 @@ import Homework3_5.model.Avatar;
 import Homework3_5.model.Student;
 import Homework3_5.repository.AvatarRepository;
 import Homework3_5.repository.StudentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ import java.util.Collection;
 
 @Service
 public class AvatarService {
-
+    private final static Logger logger = LoggerFactory.getLogger(AvatarService.class);
     private final StudentRepository studentRepository;
     private final AvatarRepository avatarRepository;
     private final String avatarsDir;
@@ -33,6 +35,7 @@ public class AvatarService {
 
     @Transactional
     public void upload(long studentId, MultipartFile file) throws IOException {
+        logger.info("Was invoked method for loading image student by studentId = {}", studentId);
         var student = studentRepository.findById(studentId)
                 .orElseThrow(StudentNotFoundException::new);
 
@@ -66,10 +69,12 @@ public class AvatarService {
 
     @Transactional
     public Avatar find(long studentId) {
+        logger.info("The method was called to search for an avatar by Id = {}", studentId);
         return avatarRepository.findByStudentId(studentId).orElse(null);
     }
 
     public Collection<Avatar> find(int page, int pageSize) {
+        logger.info("Was invoked method for getting list of student avatars on page = {} at page size = {}", page + 1, pageSize);
         return avatarRepository.findAll(PageRequest.of(page, pageSize)).getContent();
     }
     /*  FileOutputStream out = null;
