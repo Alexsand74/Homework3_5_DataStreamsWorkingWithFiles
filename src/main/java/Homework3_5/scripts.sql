@@ -8,3 +8,6 @@ select * from faculty;
 update student set faculty_id = 1;
 select * from avatar;
 select * from student ORDER BY id;
+select * from databasechangelog;
+select * from databasechangeloglock;
+
